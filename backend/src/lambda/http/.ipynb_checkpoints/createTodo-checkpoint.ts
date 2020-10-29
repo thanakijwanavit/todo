@@ -11,17 +11,18 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   var AWS = require('aws-sdk');
   const docClient = new AWS.DynamoDB.DocumentClient()
   //create new item
-  const result = docClient.put({
+  const result = await docClient.put({
       TableName: process.env.TODO_TABLE,
       Item: {
-          HashKey: newTodo.name,
+          id: newTodo.name,
           dueDate: newTodo.dueDate
       }
   }).promise()
+  
   console.log(result)
 
   return {
       statusCode: 200,
-      body: `newTodo: ${result}`
+      body: `newTodo: ${JSON.stringify(result)}`
   }
 }

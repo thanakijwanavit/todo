@@ -14,10 +14,19 @@ provider:
   
   environment:
     TODO_TABLE: Todo-${self:provider.stage}
+    region: ${self:provider.region}}
+    IMAGES_BUCKET: todo-bucket-${self:provider.stage}
+
+  s3:
+    imageBucket:
+      name: ${self:provider.environment.IMAGES_BUCKET}
+      
   iamRoleStatements:
     - Effect: Allow
       Action:
         - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
       Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}
 
 functions:
@@ -28,7 +37,7 @@ functions:
 
   # TODO: Configure this function
   GetTodos:
-    handler: src/lambda/http/createTodo.handler
+    handler: src/lambda/http/getTodos.handler
     events:
       - http:
           method: get
