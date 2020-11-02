@@ -1,20 +1,27 @@
 import 'source-map-support/register'
 import * as AWS from 'aws-sdk'
+const docClient = new AWS.DynamoDB.DocumentClient()
 
 import { APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyHandler } from 'aws-lambda'
+import { getUserId } from '../../helpers/auth'
 
-const docClient = new AWS.DynamoDB.DocumentClient()
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   // TODO: Get all TODO items for a current user
-    console.log('event was', event)
-        
+  console.log('event was', event)
+      
 
-    const result = await docClient.scan({
-      TableName: process.env.TODO_TABLE 
-    }).promise()
+  const authHeader = event.headers['Authorization']
+  const userId = getUserId(authHeader)
+  var result = await docClient.query({
+      TableName: process.env.TODO_TABLE,
+      KeyConditionExpression: 'userId = :userId',
+      ExpressionAttributeValues:{
+          ':userId': userId
+      }
+  }).promise()
 
-    console.log(result)
+  console.log(result)
     
   return {
     statusCode: 200,
